@@ -1196,7 +1196,7 @@ components:
           type: string
         name:
           type: string
-        placePhotoReference:
+        Images:
           type: array
           items:
             $ref: "#/components/schemas/PlacePhotoReference"
