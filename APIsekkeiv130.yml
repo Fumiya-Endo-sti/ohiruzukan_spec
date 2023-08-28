@@ -1,0 +1,1204 @@
+openapi: "3.0.0"
+info:
+  title: OHiru zukan API overview
+  version: 1.3.0
+  description: 変更点
+    ・API18を追加
+    ・API12の仕様変更
+
+servers:
+  - url: "http://localhost:8080"
+    description: Development server
+
+tags:
+  - name: restaurants
+    description: Access to restaurants
+  - name: visits
+    description: Access to visits
+  - name: favorites
+    description: Access to favorites
+  - name: Slack
+    description: Access to Slack
+  - name: reviews
+    description: Access to reviews
+  - name: photos
+    description: Access to photos
+  - name: map
+    description: Access to map
+  - name: search
+    description: Access to search
+  - name: user
+    description: Access to user
+
+paths:
+  /restaurants/{azureB2C-id}/:
+    get:
+      tags:
+        - restaurants
+      summary:  API1 店舗一覧を取得するAPI
+      description: 10店舗ごとにページネーションを行う
+        queryのうち、sort系パラメータは2つ以上true,asc,descになっていた時400を返します
+        total-visitsにtrueが入っていた場合descに変換されます
+        ページネーションはなし,1,0,負の値の時、1に変換されます
+      operationId: getFilterdRestaurants
+      parameters:
+        - name: azureB2C-id
+          in: path
+          description: ユーザー指定のためのID
+          required: true
+          schema:
+            type: string
+        - name: total-visits
+          in: query
+          description: 訪問回数順デフォはdesc
+          schema:
+            type: string
+            enum:
+              - "asc"
+              - "desc"
+        - name: sort-price
+          in: query
+          description: 価格順デフォはasc
+          schema:
+            type: string
+            enum:
+              - "asc"
+              - "desc"
+        - name: one-way
+          in: query
+          description: 距離が近い順
+          schema:
+            type: boolean
+        - name: star
+          in: query
+          description: 評価が高い順
+          schema:
+            type: boolean
+        - name: filterd-price1
+          in: query
+          description: 価格帯絞り込み
+          schema:
+            type: string
+        - name: filterd-price2
+          in: query
+          description: 価格帯絞り込み
+          schema:
+            type: string
+        - name: filterd-price3
+          in: query
+          description: 価格帯絞り込み
+          schema:
+            type: string
+        - name: filterd-price4
+          in: query
+          description: 価格帯絞り込み
+          schema:
+            type: string
+        - name: filterd-price5
+          in: query
+          description: 価格帯絞り込み
+          schema:
+            type: string
+        - name: filterd-price6
+          in: query
+          description: 価格帯絞り込み
+          schema:
+            type: string
+        - name: isopen
+          in: query
+          description: 営業日絞り込み
+          schema:
+            type: boolean
+        - name: freeword
+          in: query
+          description: フリーワード絞り込み
+          schema:
+            type: string
+        - name: pagination
+          in: query
+          description: ページネーション指定
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Restaurantのarray[10]とページネーションを返します
+            pagePropertiesがarrayになっていますがarrayではなく単体の構造体です
+          content:
+            application/json:
+              schema: 
+                type: object
+                required:
+                  - restaurants
+                  - pageProperties
+                properties:
+                  restaurants:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Restaurant"
+                  pageProperties:
+                    items:
+                      $ref: "#/components/schemas/PageProperties"
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+  /restaurants/{azureB2C-id}/{restaurant-id}/:  
+    get:
+      tags:
+        - restaurants
+      summary: API4 店舗情報の詳細を取得するAPI
+      description: 
+         /favorites/{azureB2C-id}/{restaurant-id}とazureB2C-id,restaurant-idの順番が逆でややこしい|
+         店はメインでふぁぼはユーザーがメインだから悩ましいところ
+      operationId: getRestaurantDetail
+      parameters:
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+        - name: azureB2C-id
+          in: path
+          description: ユーザー指定のためのID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK 店舗詳細情報を返す
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    $ref: "#/components/schemas/ResponseRestaurantDetail"
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+    post:
+      tags:
+        - restaurants
+      summary: API13 店舗を登録を依頼するAPI
+      description: 店舗を登録を依頼するAPI
+      operationId: registerRestaurant
+      parameters:
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+        - name: azureB2C-id
+          in: path
+          description: ユーザー指定のためのID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                registerRestaurantDetail:
+                  $ref: "#/components/schemas/RegisterRestaurantDetail"
+
+      responses:
+        "201":
+          description: Create 店舗詳細ページのURLを返す？
+          headers:
+            location:
+              description: detail URL
+              schema: {type: string}
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+
+  /restaurants/{restaurant-id}/:
+    put:
+      tags:
+        - restaurants
+      summary: API14 店舗情報のPR更新を依頼するAPI
+      description: 店舗情報のPR更新を依頼するAPI
+      operationId: updateRestaurantPR
+      parameters:
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: OK 更新したPRを返す
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+    delete:
+      tags:
+        - restaurants
+      summary: API15 店舗情報の削除を依頼するAPI
+      description: 店舗情報の削除を依頼するAPI
+      operationId: removeRestaurant
+      parameters:
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+
+  /visits/{azureB2C-id}/{restaurant-id}/:
+    post:
+      tags:
+        - visits
+      summary: API2 訪問記録をするAPI
+      description: 時刻はバックエンド側で記録、一定期間内で複数の訪問はエラーを返す
+      operationId: visitRestaurant
+      parameters:
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+        - name: azureB2C-id
+          in: path
+          description: ユーザー指定のためのID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK 指定店舗の訪問回数を返す
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - visits
+                  - IsVisit
+                properties:
+                  visits:
+                    type: integer
+                    format: int64
+                  IsVisit:
+                    type: boolean
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+  
+  /favorites/{azureB2C-id}/:
+    get:
+      tags:
+        - favorites
+      summary: API11 ユーザーのお気に入り店舗一覧を作成日時が新しい順に取得するAPI
+      description: 
+        ページネーションは行わない
+      operationId: getFavoriteRestaurants
+      parameters:
+        - name: azureB2C-id
+          in: path
+          description: ユーザー指定のためのID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200": 
+          description: Restaurantのarray[10]を返します
+          content:
+            application/json:
+              schema: 
+                type: object
+                required:
+                  - restaurants
+                properties:
+                  restaurants:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Restaurant"
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+
+  /favorites/{azureB2C-id}/{restaurant-id}/:
+    put:
+      tags:
+        - favorites
+      summary: API3 お気に入り登録するAPI
+      description: オンオフ切り替えが可能
+      operationId: favoriteRestaurant
+      parameters:
+        - name: azureB2C-id
+          in: path
+          description: ユーザー指定のためのID
+          required: true
+          schema:
+            type: string
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK お気に入りかどうかを返します
+          content:
+            application/json:
+              schema:
+                required:
+                  - IsFavorite
+                properties:
+                  IsFavorite: 
+                    type: boolean
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+
+  /Slack/{restaurant-id}/:
+    post:
+      tags:
+        - Slack
+      summary: 【保留】API6 Slackに店舗情報を共有するAPI
+      description: 指定のチャンネルにリンクを投げる
+      operationId: shareRestaurantOnSlack
+      parameters:
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - azureB2C-id
+              properties:
+                azureB2C-id:
+                  type: string
+                text:
+                  type: string
+      responses:
+        "201":
+          description: Create 投稿完了
+          headers:
+            location:
+              description: SlackURL
+              schema: {type: string}
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized 
+        "403":
+          description: Forbidden
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+  
+  /reviews/{restaurant-id}/:
+    get:
+      tags:
+        - reviews
+      summary: API7 口コミ・評価一覧を作成日時が新しい順に取ってくるAPI
+      operationId: getReviews
+      parameters:
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 口コミ一覧を取得
+          content:
+            application/json:
+              schema: 
+                type: object
+                required:
+                  - reviews
+                properties:
+                  reviews:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ResponseReviewDetail"
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+    post:
+      tags:
+        - reviews
+      summary: API8 口コミを投稿するAPI
+      description: 口コミを投稿するAPI
+      operationId: registerReview
+      parameters:
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                registerReviewDetail:
+                  $ref: "#/components/schemas/RegisterReviewDetail"
+                
+      responses:
+        "201":
+          description: 投稿成功
+          headers:
+            location:
+              description: review URL
+              schema: {type: string}
+        "400":
+          description: Bad 
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+
+  /photos/{restaurant-id}/:
+    get:
+      tags:
+        - photos
+      summary: API9 写真一覧を作成日時が新しい順に取ってくるAPI
+      operationId: getRestaurantPhotos
+      parameters:
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: imageURLのarrayを返します
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  type: object
+                  required:
+                  - URLList
+                  - reviewID
+                  properties:
+                    URLList:
+                      type: string
+                    reviewID:
+                      type: string
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+  
+  /map/:
+    get:
+      tags:
+        - map
+      summary: API16 店舗一覧の位置情報を取得するAPI
+      description: 店舗一覧の位置情報を取得するAPI
+      operationId: getRestaurantLocations
+      parameters:
+        - name: filtered-price
+          in: query
+          description: 価格帯絞り込み
+          schema:
+            type: integer
+            format: int64
+        - name: isopen
+          in: query
+          description: 営業日絞り込み
+          schema:
+            type: boolean
+        - name: freeword
+          in: query
+          description: フリーワード絞り込み
+          schema:
+            type: string
+      responses:
+        "200": 
+          description: 住所、緯度経度のオブジェクトのarrayを返します
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  type: object
+                  required:
+                  - restaurant-id
+                  - address
+                  properties:
+                    restaurant-id:
+                      type: string
+                    address:
+                      type: string
+                    lat:
+                      type: number
+                      format: float
+                    lng:
+                      type: number
+                      format: float
+        "400":  
+          description: Bad Request
+        "404":
+          description: Not Found
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+
+  /map/{restaurant-id}/:
+    get:
+      tags:
+        - map
+      summary: API10 店舗の位置情報を取得するAPI
+      description: 店舗の位置情報を取得するAPI
+      operationId: getRestaurantLocation
+      parameters:
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 住所、緯度経度のオブジェクトを返します
+          content:
+            application/json:
+              schema: 
+                type: object
+                required:
+                  - address
+                properties:
+                  adrress:
+                    type: string
+                  lat:
+                    type: number
+                    format: float
+                  lng:
+                    type: number
+                    format: float
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+  
+  /search/:
+    get:
+      tags:
+        - search
+      summary: API12 GMAPIから店名による検索を行って候補一覧を取ってくるAPI
+      description: 検索テキストはNULLでも許す？
+      operationId: searchRestaurantsByText
+      parameters:
+        - name: query-text
+          in: query
+          description: 検索テキスト
+          #required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 検索候補のリスト（登録済みフラグ含む）|
+            何も返ってこなかったときもゆるしていい？
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: "#/components/schemas/GoogleRestaurants"
+                      
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+  
+  /search/{restaurant-id}/:
+    get:
+      tags:
+        - search
+      summary: API18 GMAPIから店舗詳細を取ってくるAPI
+      description: restaurant-idから詳細情報を取る
+      operationId: searchRestaurantsByID
+      parameters:
+        - name: restaurant-id
+          in: path
+          description: レストラン指定のためのID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 店舗詳細
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  items:
+                    $ref: "#/components/schemas/RegisterRestaurantDetail"
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+
+  /users/{azureB2C-id}/:
+    post:
+      tags:
+        - user
+      summary: API17 ユーザーを登録するAPI
+      description: ユーザーを登録するAPI
+      operationId: registerUser
+      parameters:
+        - name: azureB2C-id
+          in: path
+          description: ユーザー指定のためのID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                
+      responses:
+        "200":
+          description: 登録成功
+          headers:
+            location:
+              description: user-id
+              schema: {type: string}
+        "400":
+          description: Bad 
+        "429":
+          description: Too Many Requests
+        "500":
+          description: Internal Server Error
+        "503":
+          description: Service Unavailable
+
+
+
+#security:
+
+components:
+  schemas:
+    Restaurant:
+      type: object
+      required: # 必須フィールド
+        - restaurantID
+        - name
+        - oneWay
+        - IsFavorite
+        - IsVisit
+      properties:
+        restaurantID:
+          type: string
+        name:
+          type: string
+        oneWay:
+          description: 所用時間
+          type: integer
+          format: int64
+        tags:
+          type: array
+          items: {type: string}
+        averageStars:
+          type: number
+          format: float
+        totalVisits:
+          type: integer
+          format: int64
+        imageURL:
+          type: string
+        IsOpen:
+          type: boolean
+        IsFavorite:
+          type: boolean
+        IsVisit:
+          type: boolean
+
+    ResponseRestaurantDetail:
+      type: object
+      required:
+        - restaurantID
+        - name
+        - address
+        - delivery
+        - takeout
+        - QRpath
+        - IsFavorite
+        - IsVisit
+        - oneWay
+        - updatedAt
+        - createdAt
+      properties:
+        restaurantID:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        phoneNumber:
+          type: string
+        lat:
+          type: number
+          format: float
+        lng:
+          type: number
+          format: float
+        delivery:
+          type: boolean
+        takeout:
+          type: boolean
+        OpenTime:
+          properties:
+            schema:
+              $ref: "#/components/schemas/OpenTime"
+        modeWaits:
+          type: string
+          enum:
+            - "すぐ"
+            - "5分未満"
+            - "5~10分"
+            - "10~15分"
+            - "15分以上"
+        modePrice:
+          type: string
+          enum:
+            - "~500円"
+            - "501~1000円"
+            - "1001~1500円"
+            - "1501~2000円"
+            - "2001~3000円"
+            - "3001~円"
+        paymentsDetails:
+          type: array
+          items: {type: string}
+        tags:
+          type: array
+          items: {type: string}
+        PR:
+          type: string
+        pcURL:
+          type: string
+        oneWay:
+          type: integer
+          format: int64
+        averageStars:
+          type: number
+          format: float
+        imagesURL:
+          type: array
+          items: {type: string}
+        QRpath:
+          type: string
+        IsFavorite:
+          type: boolean
+        IsVisit:
+          type: boolean
+        updatedAt:
+          type: string
+        createdAt:
+          type: string
+    
+    RegisterRestaurantDetail:
+      type: object
+      required:
+        - restaurantID
+        - name
+        - address
+        - delivery
+        - takeout
+        - IsRegistered
+      properties:
+        restaurantID:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        phoneNumber:
+          type: string
+        lat:
+          type: number
+          format: double
+        lng:
+          type: number
+          format: double
+        delivery:
+          type: boolean
+        takeout:
+          type: boolean
+        OpenTime:
+          properties:
+            schema:
+              $ref: "#/components/schemas/OpenTime"
+        star:
+          type: integer
+          format: int64
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+        tags:
+          type: array
+          maxItems: 3
+          items: {type: string}
+        waits:
+          type: integer
+          format: int64
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+        priceRange:
+          type: integer
+          format: int64
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+            - 6
+        paymentsDetails:
+          type: array
+          items: {type: string}
+        PR:
+          type: string
+        pcURL:
+          type: string
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlacePhotoReference"
+        IsRegistered:
+          type: boolean
+
+    RegisterReviewDetail:
+      type: object
+      required:
+        - azureB2C-id
+        - restaurantID
+        - review
+        - star
+      properties:
+        azureB2C-id:
+          type: string
+        restaurantID:
+          type: string
+        review:
+          type: string
+        tags:
+          type: array
+          maxItems: 3
+          items: {type: string}
+        star:
+          type: integer
+          format: int64
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+        waits:
+          type: integer
+          format: int64
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+        priceRange:
+          type: integer
+          format: int64
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+            - 6
+        paymentsDetails:
+          type: array
+          items: {type: string}
+        imageUrl:
+          type: array
+          maxItems: 3
+          items: {type: string}
+          uniqueItems: true
+
+    ResponseReviewDetail:
+      type: object
+      required:
+        - restaurantID
+        - review
+        - createdAt
+        - star
+      properties:
+        reviewID:
+          type: string
+        azureB2C-id:
+          type: string
+        restaurantID:
+          type: string
+        userName:
+          type: string
+        review:
+          type: string
+        tags:
+          type: array
+          maxItems: 3
+          items: {type: string}
+        star:
+          type: integer
+          format: int64
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+        waits:
+          type: string
+          enum:
+            - "すぐ"
+            - "5分未満"
+            - "5~10分"
+            - "10~15分"
+            - "15分以上"
+        priceRange:
+          type: string
+          enum:
+            - "~500円"
+            - "501~1000円"
+            - "1001~1500円"
+            - "1501~2000円"
+            - "2001~3000円"
+            - "3001~円"
+        paymentsDetails:
+          type: array
+          items: {type: string}
+        imageUrl:
+          type: array
+          maxItems: 3
+          items: {type: string}
+          uniqueItems: true
+        updatedAt:
+          type: string
+        createdAt:
+          type: string
+    
+    OpenTime:
+      type: object
+      properties:
+        openMon:
+          type: boolean
+        openTue:
+          type: boolean
+        openWed:
+          type: boolean
+        openThu:
+          type: boolean
+        openFri:
+          type: boolean
+        openSat:
+          type: boolean
+        openSun:
+          type: boolean
+        openHol:
+          type: boolean
+        timeMon:
+          type: string
+        timeTue:
+          type: string
+        timeWed:
+          type: string
+        timeThu:
+          type: string
+        timeFri:
+          type: string
+        timeSat:
+          type: string
+        timeSun:
+          type: string
+        timeHol:
+          type: string
+    
+    PlacePhotoReference:
+      type: object
+      required:
+        - photoReference
+      properties:
+        photoReference:
+          description: PlacePhotoAPIで叩くためのID
+          type: string
+        maxHeight:
+          description: 最大高さ
+          type: integer
+          format: int64
+        maxWidth:
+          description: 最大幅
+          type: integer
+          format: int64
+
+    PageProperties:
+      type: object
+      required:
+        - pages
+        - pagination
+      properties:
+        pages:
+          description: 全体のページ数
+          type: integer
+          format: int64
+        pagination:
+          description: 現在のページ番号
+          type: integer
+          format: int64
+    
+    GoogleRestaurants:
+      type: object
+      properties:
+        restaurants:
+          type: string
+        name:
+          type: string
+        placePhotoReference:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlacePhotoReference"
+        IsRegistered:
+          type: boolean
