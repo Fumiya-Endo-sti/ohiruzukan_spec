@@ -1174,9 +1174,6 @@ components:
           description: 最大幅
           type: integer
           format: int64
-        imageUrl:
-          type: array
-          items: {type: string}
 
     PageProperties:
       type: object
@@ -1204,5 +1201,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/PlacePhotoReference"
+        imageUrl:
+          type: array
+          items: {type: string}
         IsRegistered:
           type: boolean
