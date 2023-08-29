@@ -1,10 +1,10 @@
 openapi: "3.0.0"
 info:
   title: OHiru zukan API overview
-  version: 1.3.1
+  version: 1.3.2
   description: 変更点
-    ・API12のresponse
-        restaurants -> restaurantID
+    ・API8のazureB2CID
+        azureB2C-id -> azureB2CID
 
 servers:
   - url: "http://localhost:8080"
@@ -1008,12 +1008,12 @@ components:
     RegisterReviewDetail:
       type: object
       required:
-        - azureB2C-id
+        - azureB2CID
         - restaurantID
         - review
         - star
       properties:
-        azureB2C-id:
+        azureB2CID:
           type: string
         restaurantID:
           type: string
@@ -1070,7 +1070,7 @@ components:
       properties:
         reviewID:
           type: string
-        azureB2C-id:
+        azureB2CID:
           type: string
         restaurantID:
           type: string
