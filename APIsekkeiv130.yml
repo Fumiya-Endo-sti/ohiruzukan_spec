@@ -5,6 +5,7 @@ info:
   description: 変更点
     ・API8のazureB2CID
         azureB2C-id -> azureB2CID
+    ・GoogleRestaurantsにimageUrlを追加
 
 servers:
   - url: "http://localhost:8080"
@@ -1200,5 +1201,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/PlacePhotoReference"
+        imageUrl:
+          type: array
+          items: {type: string}
         IsRegistered:
           type: boolean
