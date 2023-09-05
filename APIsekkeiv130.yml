@@ -1,10 +1,9 @@
 openapi: "3.0.0"
 info:
   title: OHiru zukan API overview
-  version: 1.3.3
+  version: 1.3.4
   description: 変更点
-    ・API13とAPI8
-      price,waitsを文字列に変更
+    ・APIのステータスコードに対応する表示メッセージを追加
 
 servers:
   - url: "http://localhost:8080"
@@ -139,16 +138,16 @@ paths:
                   pageProperties:
                     items:
                       $ref: "#/components/schemas/PageProperties"
+        "204":
+          description: No Content
+            該当する店舗は見つかりませんでした。
         "400":
           description: Bad Request
+            ソートもしくは絞り込み条件、ページネーションに間違いがあります（フロント側向け）。
         "404":
           description: Not Found
-        "429":
-          description: Too Many Requests
-        "500":
-          description: Internal Server Error
-        "503":
-          description: Service Unavailable
+            ユーザーが見つかりませんでした。
+
   /restaurants/{azureB2C-id}/{restaurant-id}/:  
     get:
       tags:
@@ -181,16 +180,9 @@ paths:
                 properties:
                   detail:
                     $ref: "#/components/schemas/ResponseRestaurantDetail"
-        "400":
-          description: Bad Request
         "404":
           description: Not Found
-        "429":
-          description: Too Many Requests
-        "500":
-          description: Internal Server Error
-        "503":
-          description: Service Unavailable
+            レストランもしくはユーザーが見つかりませんでした。
     post:
       tags:
         - restaurants
@@ -225,16 +217,21 @@ paths:
             location:
               description: detail URL
               schema: {type: string}
+        "404":
+          description: Not Found
+            ユーザーが見つかりませんでした。
         "400":
           description: Bad Request
+            リクエストボディが不正です（フロント向け）。
         "409":
           description: Conflict
-        "429":
-          description: Too Many Requests
+            既にそのレストランは登録済みです。
         "500":
           description: Internal Server Error
+            サーバー側でエラーが発生しました。
         "503":
           description: Service Unavailable
+            一日の合計リクエスト上限に達しました。
 
   /restaurants/{restaurant-id}/:
     put:
@@ -264,16 +261,10 @@ paths:
                 type: string
         "400":
           description: Bad Request
+            PRが文字列上限を超えています。リクエストボディが不正です（フロント向け）
         "404":
           description: Not Found
-        "409":
-          description: Conflict
-        "429":
-          description: Too Many Requests
-        "500":
-          description: Internal Server Error
-        "503":
-          description: Service Unavailable
+            レストランは見つかりませんでした。
     delete:
       tags:
         - restaurants
@@ -290,16 +281,9 @@ paths:
       responses:
         "204":
           description: No Content
-        "400":
-          description: Bad Request
         "404":
           description: Not Found
-        "429":
-          description: Too Many Requests
-        "500":
-          description: Internal Server Error
-        "503":
-          description: Service Unavailable
+            レストランは見つかりませんでした。
 
   /visits/{azureB2C-id}/{restaurant-id}/:
     post:
@@ -337,16 +321,12 @@ paths:
                     format: int64
                   IsVisit:
                     type: boolean
-        "400":
-          description: Bad Request
-        "409":
-          description: Conflict
-        "429":
-          description: Too Many Requests
+        "404":
+          description: Not Found
+            ユーザーもしくはレストランは見つかりませんでした。
         "500":
           description: Internal Server Error
-        "503":
-          description: Service Unavailable
+            サーバー側でエラーが発生しました。
   
   /favorites/{azureB2C-id}/:
     get:
@@ -377,16 +357,12 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Restaurant"
-        "400":
-          description: Bad Request
+        "204":
+          description: No Content
+            該当する店舗は見つかりませんでした。
         "404":
           description: Not Found
-        "429":
-          description: Too Many Requests
-        "500":
-          description: Internal Server Error
-        "503":
-          description: Service Unavailable
+            ユーザーが見つかりませんでした。
 
   /favorites/{azureB2C-id}/{restaurant-id}/:
     put:
@@ -419,16 +395,9 @@ paths:
                 properties:
                   IsFavorite: 
                     type: boolean
-        "400":
-          description: Bad Request
         "404":
           description: Not Found
-        "429":
-          description: Too Many Requests
-        "500":
-          description: Internal Server Error
-        "503":
-          description: Service Unavailable
+            ユーザーもしくはレストランは見つかりませんでした。
 
   /Slack/{restaurant-id}/:
     post:
@@ -502,16 +471,12 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/ResponseReviewDetail"
-        "400":
-          description: Bad Request
+        "204":
+          description: No Content
+            該当する口コミは見つかりませんでした。
         "404":
           description: Not Found
-        "429":
-          description: Too Many Requests
-        "500":
-          description: Internal Server Error
-        "503":
-          description: Service Unavailable
+            レストランは見つかりませんでした。
     post:
       tags:
         - reviews
@@ -541,13 +506,15 @@ paths:
               description: review URL
               schema: {type: string}
         "400":
-          description: Bad 
-        "429":
-          description: Too Many Requests
+          description: Bad Request
+            リクエストボディが不正です（フロント向け）
+            評価またはレビューを入力してください。
+        "404":
+          description: Not Found
+            ユーザーもしくはレストランは見つかりませんでした。
         "500":
           description: Internal Server Error
-        "503":
-          description: Service Unavailable
+            サーバー側でエラーが発生しました。
 
   /photos/{restaurant-id}/:
     get:
@@ -579,16 +546,15 @@ paths:
                       type: string
                     reviewID:
                       type: string
-        "400":
-          description: Bad Request
+        "204":
+          description: No Content
+            レビュー画像が存在しませんでした。
         "404":
           description: Not Found
-        "429":
-          description: Too Many Requests
+            レストランは見つかりませんでした。
         "500":
           description: Internal Server Error
-        "503":
-          description: Service Unavailable
+            サーバー側でエラーが発生しました。
   
   /map/:
     get:
@@ -716,16 +682,18 @@ paths:
                 items:
                   $ref: "#/components/schemas/GoogleRestaurants"
                       
+        "204":
+          description: No Content
+            該当する店舗は見つかりませんでした。
         "400":
           description: Bad Request
-        "404":
-          description: Not Found
-        "429":
-          description: Too Many Requests
+            検索テキストを入力してください。
         "500":
           description: Internal Server Error
+            サーバー側でエラーが発生しました
         "503":
           description: Service Unavailable
+            一日の合計リクエスト上限に達しました。
   
   /search/{restaurant-id}/:
     get:
@@ -753,14 +721,15 @@ paths:
                     $ref: "#/components/schemas/RegisterRestaurantDetail"
         "400":
           description: Bad Request
-        "404":
-          description: Not Found
-        "429":
-          description: Too Many Requests
+        "409":
+          description: Conflict
+            既にそのレストランは登録済みです。
         "500":
           description: Internal Server Error
+            サーバー側でエラーが発生しました。
         "503":
           description: Service Unavailable
+            一日の合計リクエスト上限に達しました。
 
   /users/{azureB2C-id}/:
     post:
@@ -794,14 +763,11 @@ paths:
               description: user-id
               schema: {type: string}
         "400":
-          description: Bad 
-        "429":
-          description: Too Many Requests
-        "500":
-          description: Internal Server Error
-        "503":
-          description: Service Unavailable
-
+          description: Bad Request
+            リクエストボディが不正です（フロント向け）。
+        "409":
+          description: Conflict
+            店舗は既に登録されています。
 
 
 #security:
