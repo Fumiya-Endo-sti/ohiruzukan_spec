@@ -1,10 +1,10 @@
 openapi: "3.0.0"
 info:
   title: OHiru zukan API overview
-  version: 1.4.0
+  version: 1.4.1
   description: 変更点
-    ・API19手動更新くん作成
-    ・APIのステータスコードに対応する表示メッセージを追加
+    ・PhotoReferenceに関して画像がないときにazure上のサンプル画像を使用するように変更
+    ・google検索の際に片道を計算
 
 servers:
   - url: "http://localhost:8080"
@@ -974,6 +974,10 @@ components:
             - 3
             - 4
             - 5
+        oneWay:
+          description: 所用時間
+          type: integer
+          format: int64
         tags:
           type: array
           maxItems: 3
@@ -1006,6 +1010,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/PlacePhotoReference"
+        imageUrl:
+          type: array
+          items: {type: string}
+        IsSaveAzure:
+          type: boolean
         IsRegistered:
           type: boolean
 
@@ -1198,6 +1207,10 @@ components:
           type: string
         name:
           type: string
+        oneWay:
+          description: 所用時間
+          type: integer
+          format: int64
         Images:
           type: array
           items:
