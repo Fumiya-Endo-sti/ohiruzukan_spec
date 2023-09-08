@@ -1205,5 +1205,7 @@ components:
         imageUrl:
           type: array
           items: {type: string}
+        IsSaveAzure:
+          type: boolean
         IsRegistered:
           type: boolean
