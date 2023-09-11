@@ -1,10 +1,9 @@
 openapi: "3.0.0"
 info:
   title: OHiru zukan API overview
-  version: 1.4.1
+  version: 1.4.2
   description: 変更点
-    ・PhotoReferenceに関して画像がないときにazure上のサンプル画像を使用するように変更
-    ・google検索の際に片道を計算
+    ・API8のリクエストボディにpostSlackを追加
 
 servers:
   - url: "http://localhost:8080"
@@ -1070,6 +1069,8 @@ components:
           maxItems: 3
           items: {type: string}
           uniqueItems: true
+        postSlack:
+          type: boolean
 
     ResponseReviewDetail:
       type: object
