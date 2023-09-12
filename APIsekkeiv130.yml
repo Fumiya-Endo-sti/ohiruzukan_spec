@@ -1,7 +1,7 @@
 openapi: "3.0.0"
 info:
   title: OHiru zukan API overview
-  version: 1.4.2
+  version: 1.5.0
   description: 変更点
     ・API8のリクエストボディにpostSlackを追加
 
@@ -669,7 +669,7 @@ paths:
             type: string
       responses:
         "200":
-          description: 住所、緯度経度のオブジェクトを返します
+          description: QR、pcURL、住所、緯度経度のオブジェクトを返します
           content:
             application/json:
               schema: 
@@ -685,6 +685,10 @@ paths:
                   lng:
                     type: number
                     format: float
+                  QRpath:
+                    type: string
+                  pcURL:
+                    type: string
         "400":
           description: Bad Request
         "404":
