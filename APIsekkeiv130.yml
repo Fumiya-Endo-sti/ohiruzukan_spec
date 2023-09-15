@@ -1,9 +1,9 @@
 openapi: "3.0.0"
 info:
   title: OHiru zukan API overview
-  version: 1.5.0
+  version: 1.5.1
   description: 変更点
-    ・API8のリクエストボディにpostSlackを追加
+    ・API1,4,11のレスポンスにtotalVisits,yourVisitsを追加
 
 servers:
   - url: "http://localhost:8080"
@@ -843,6 +843,9 @@ components:
         totalVisits:
           type: integer
           format: int64
+        yourVisits:
+          type: integer
+          format: int64
         imageURL:
           type: string
         IsOpen:
@@ -922,6 +925,12 @@ components:
         averageStars:
           type: number
           format: float
+        totalVisits:
+          type: integer
+          format: int64
+        yourVisits:
+          type: integer
+          format: int64
         imagesURL:
           type: array
           items: {type: string}
