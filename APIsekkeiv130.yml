@@ -4,6 +4,7 @@ info:
   version: 1.5.1
   description: 変更点
     ・API1,4,11のレスポンスにtotalVisits,yourVisitsを追加
+    ・Opentimeの中にisOpentimeKnownを追加
 
 servers:
   - url: "http://localhost:8080"
@@ -1149,6 +1150,8 @@ components:
     OpenTime:
       type: object
       properties:
+        isOpentimeKnown:
+          type: boolean
         openMon:
           type: boolean
         openTue:
